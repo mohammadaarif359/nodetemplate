@@ -6,7 +6,7 @@ const admin = async(req,res,next) =>{
 		try {
 			let token  = req.headers.authorization.split(' ')[1];
 			let decodetoken = jwt.verify(token,process.env.JWT_SECRET)
-			let auth_user = await User.findOne({_id:decodetoken.id,auth_token:token}).select('-password');
+			let auth_user = await User.findOne({_id:decodetoken.id,auth_token:token}).select('-password').populate('role_id');
 			if(auth_user) {
 				req.user = auth_user;
 				next();

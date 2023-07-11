@@ -9,7 +9,7 @@ ConnectDB();
 
 const app = express();
 
-//app.use(express.json())
+app.use(express.json())
 
 //app.use(bodyParser.json())
 //app.use(bodyParser.urlencoded({ extended: true }));
@@ -31,6 +31,13 @@ app.use('/api/media',require('./routes/media'))
 
 // for admin route
 app.use('/admin/user',require('./routes/admin/user'))
+
+// for category route
+app.use('/admin/category',require('./routes/admin/category'))
+
+// for category route
+app.use('/admin/permission',require('./routes/admin/permission'))
+
 const port = process.env.PORT || 5000;
 app.listen(port,()=>{
     console.log(`server run on port ${port}`)
