@@ -8,7 +8,7 @@ const admin = require('../../middleware/admin')
 const access = require('../../middleware/access')
 const mongoose = require('mongoose')
 
-router.post('/create',admin,[
+router.post('/create',admin,access.grantAccess('createAny', 'permission'),[
     body('display_name','desc is required').notEmpty(),
     body('name','Name is required').notEmpty()
     .custom((value,{req}) => {
@@ -38,7 +38,7 @@ router.post('/create',admin,[
     }   
 })
 
-router.get('/list',admin,async(req,res)=>{
+router.get('/list',admin,access.grantAccess('readAny', 'permission'),async(req,res)=>{
     let type = 'error';
     try {
         let {page,limit,search} = req.query;
@@ -51,7 +51,7 @@ router.get('/list',admin,async(req,res)=>{
     }
 });
 
-router.get('/edit/:id',admin,async(req,res)=>{
+router.get('/edit/:id',admin,access.grantAccess('updateAny', 'permission'),async(req,res)=>{
     let type = 'error';
     const {id} = req.params;
     try {
@@ -66,7 +66,7 @@ router.get('/edit/:id',admin,async(req,res)=>{
     }
 });
 
-router.post('/update',admin,[
+router.post('/update',admin,access.grantAccess('updateAny', 'permission'),[
     body('id','Id is required').notEmpty(),
     body('display_name','Display name is required').notEmpty(),
     body('name','Email must be valid').isEmail()
@@ -98,7 +98,7 @@ router.post('/update',admin,[
     }   
 })
 
-router.get('/delete/:id',admin,async(req,res)=>{
+router.get('/delete/:id',admin,access.grantAccess('deleteAny', 'permission'),async(req,res)=>{
     let type = 'error';
     const {id} = req.params;
     try {
@@ -141,34 +141,7 @@ router.get('/assign-list/:role_id',async(req,res)=>{
     let type = 'error';
     try {
         let role_id = req.params.role_id;
-        //const response = await RolePermission.find({role_id:role_id}).populate('permission_id');
-        const response = await RolePermission.aggregate([
-            {
-                $match:{
-                    role_id:new mongoose.Types.ObjectId(role_id)
-                }
-            },
-            {
-                $unwind:"$permissions"
-            },
-            {
-                $lookup: {
-                    from: 'permissions',
-                    localField:'permission_id',
-                    foreignField:'_id',
-                    as:'permission'
-                }
-            },
-            {
-                $project:{
-                    role:"admin",
-                    resource:{ $arrayElemAt: ['$permission.name', 0] },
-                    action:"$permissions",
-                    attributes:'*',
-                    _id:0
-                }
-            }
-        ]);
+        const response = await RolePermission.find({role_id:role_id}).populate('permission_id');
         return res.status(200).json({type:'success',message:'permission assign get sucessfully',data:response,code:200})
     } catch(error) {
         return res.status(500).json({type,error:error.message,code:500})
