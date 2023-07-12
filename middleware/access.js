@@ -3,7 +3,6 @@ const acccessType = process.env.ACCESS_TYPE;
 if(acccessType == 'by_roles_file') {
   const { roles } = require('../roles');
   exports.grantAccess = (action, resource) => {
-    console.log('in grand access');
     return async (req, res, next) => {
     let type='error';
     try {
